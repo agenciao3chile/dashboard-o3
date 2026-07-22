@@ -26,7 +26,7 @@ export function App() {
   return (
     <div className="app-frame">
       <div className="app">
-        <Sidebar demo={!!auth?.demo} />
+        <Sidebar />
         <div className="main">
           <Header demo={!!auth?.demo} onLogout={logout} />
           <div className="content">

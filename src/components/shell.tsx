@@ -38,7 +38,7 @@ export function O3Logo({ className = "logo" }: { className?: string }) {
   );
 }
 
-export function Sidebar({ demo }: { demo: boolean }) {
+export function Sidebar() {
   const { section, setSection } = useStore();
   return (
     <aside className="sidebar">
@@ -62,21 +62,6 @@ export function Sidebar({ demo }: { demo: boolean }) {
           </div>
         ))}
       </nav>
-
-      <div className="sidebar-status">
-        <span className="status-icon"><Icon name="activity" /></span>
-        <div style={{ minWidth: 0 }}>
-          <b>{demo ? "Modo demo" : "En vivo"}</b>
-          <span>
-            <i style={demo ? { background: "var(--warn)", boxShadow: "0 0 8px rgba(229,171,69,.6)" } : undefined} />
-            {demo ? "Datos sintéticos" : "Postgres · Producción"}
-          </span>
-        </div>
-      </div>
-      <div className="nav-foot">
-        Los datos vienen de los reportes del agente de Telegram: reflejan actividad y avance,
-        no horas ni cumplimiento de fechas.
-      </div>
     </aside>
   );
 }
@@ -95,7 +80,13 @@ export function Header({ demo, onLogout }: { demo: boolean; onLogout?: () => voi
           <span className="crumb-now">{t.crumb}</span>
         </div>
         <div className="header-actions">
-          <span className="updated">Actualizado {now}</span>
+          <div className="header-meta">
+            <span className="updated">Actualizado {now}</span>
+            <span className={`live ${demo ? "demo" : ""}`}>
+              <i />
+              {demo ? "Modo demo · datos sintéticos" : "En vivo · Producción"}
+            </span>
+          </div>
           {onLogout && (
             <button className="icon-button" title="Salir" aria-label="Salir" onClick={onLogout}>
               <Icon name="logout" />
@@ -108,7 +99,6 @@ export function Header({ demo, onLogout }: { demo: boolean; onLogout?: () => voi
           <h1>{t.h1}</h1>
           <div className="sub">{t.sub}</div>
         </div>
-        {demo && <span className="demo-pill">Modo demo · datos sintéticos</span>}
       </div>
     </header>
   );
