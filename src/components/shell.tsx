@@ -35,10 +35,11 @@ export function Sidebar() {
     <aside className="sidebar">
       <div className="brand">
         <O3Logo />
-        <div>
-          <b>Panel de Gestión</b>
-          <span>Agencia O3</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <b>Agencia O3</b>
+          <span>Panel de gestión</span>
         </div>
+        <span style={{ color: "var(--text-3)", fontSize: 12 }}>⌄</span>
       </div>
       {NAV.map((n) => (
         <button
