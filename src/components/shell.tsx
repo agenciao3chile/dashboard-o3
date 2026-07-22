@@ -42,14 +42,7 @@ export function Sidebar({ demo }: { demo: boolean }) {
   const { section, setSection } = useStore();
   return (
     <aside className="sidebar">
-      <div className="brand">
-        <span className="brand-mark"><O3Logo /></span>
-        <div className="brand-copy">
-          <b>Agencia O3</b>
-          <small>Panel de gestión</small>
-        </div>
-        <span className="brand-chevron">⌄</span>
-      </div>
+      <div className="brand-logo"><O3Logo /></div>
 
       <nav className="side-nav">
         {NAV_GROUPS.map((g) => (
