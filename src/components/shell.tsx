@@ -2,21 +2,30 @@ import { useEffect, useState } from "react";
 import { useStore, activeFilterCount, type Section } from "../store";
 import { useApi, estadoLabel, estadoColor } from "../lib";
 import { api } from "../api";
+import { Icon } from "./icons";
 
-const NAV: { key: Section; label: string; ico: string }[] = [
-  { key: "resumen", label: "Resumen", ico: "▦" },
-  { key: "operacion", label: "Operación", ico: "⇄" },
-  { key: "equipo", label: "Equipo", ico: "◑" },
-  { key: "clientes", label: "Clientes", ico: "◇" },
-  { key: "calidad", label: "Calidad de datos", ico: "✓" },
+const NAV_GROUPS: { label: string; items: { key: Section; label: string; icon: string }[] }[] = [
+  {
+    label: "Gestión",
+    items: [
+      { key: "resumen", label: "Resumen", icon: "resumen" },
+      { key: "operacion", label: "Operación", icon: "operacion" },
+      { key: "equipo", label: "Equipo", icon: "equipo" },
+      { key: "clientes", label: "Clientes", icon: "clientes" },
+    ],
+  },
+  {
+    label: "Datos",
+    items: [{ key: "calidad", label: "Calidad de datos", icon: "calidad" }],
+  },
 ];
 
-export const SECTION_TITLE: Record<Section, { h1: string; sub: string }> = {
-  resumen: { h1: "Resumen ejecutivo", sub: "Estado real de la agencia, orientado a decisiones" },
-  operacion: { h1: "Operación y flujo", sub: "Embudo, antigüedad, revisión, bloqueos y retrabajo" },
-  equipo: { h1: "Equipo y carga", sub: "Capacidad y distribución del trabajo (no es un ranking)" },
-  clientes: { h1: "Clientes y proyectos", sub: "Carga, concentración y avance registrado" },
-  calidad: { h1: "Calidad de datos", sub: "Confiabilidad de los análisis y seguimiento" },
+export const SECTION_TITLE: Record<Section, { h1: string; sub: string; crumb: string }> = {
+  resumen: { h1: "Resumen ejecutivo", sub: "Estado real de la agencia, orientado a decisiones", crumb: "Resumen" },
+  operacion: { h1: "Operación y flujo", sub: "Embudo, antigüedad, revisión, bloqueos y retrabajo", crumb: "Operación" },
+  equipo: { h1: "Equipo y carga", sub: "Capacidad y distribución del trabajo (no es un ranking)", crumb: "Equipo" },
+  clientes: { h1: "Clientes y proyectos", sub: "Carga, concentración y avance registrado", crumb: "Clientes" },
+  calidad: { h1: "Calidad de datos", sub: "Confiabilidad de los análisis y seguimiento", crumb: "Calidad de datos" },
 };
 
 export function O3Logo({ className = "logo" }: { className?: string }) {
@@ -29,50 +38,83 @@ export function O3Logo({ className = "logo" }: { className?: string }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ demo }: { demo: boolean }) {
   const { section, setSection } = useStore();
   return (
     <aside className="sidebar">
       <div className="brand">
-        <O3Logo />
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <span className="brand-mark"><O3Logo /></span>
+        <div className="brand-copy">
           <b>Agencia O3</b>
-          <span>Panel de gestión</span>
+          <small>Panel de gestión</small>
         </div>
-        <span style={{ color: "var(--text-3)", fontSize: 12 }}>⌄</span>
+        <span className="brand-chevron">⌄</span>
       </div>
-      {NAV.map((n) => (
-        <button
-          key={n.key}
-          className={`nav-item ${section === n.key ? "active" : ""}`}
-          onClick={() => setSection(n.key)}
-        >
-          <span className="ico">{n.ico}</span>
-          {n.label}
-        </button>
-      ))}
+
+      <nav className="side-nav">
+        {NAV_GROUPS.map((g) => (
+          <div className="nav-group" key={g.label}>
+            <div className="nav-label">{g.label}</div>
+            {g.items.map((n) => (
+              <button
+                key={n.key}
+                className={`nav-item ${section === n.key ? "active" : ""}`}
+                onClick={() => setSection(n.key)}
+              >
+                <span className="ico"><Icon name={n.icon} /></span>
+                {n.label}
+                {section === n.key && <span className="nav-active-dot" />}
+              </button>
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      <div className="sidebar-status">
+        <span className="status-icon"><Icon name="activity" /></span>
+        <div style={{ minWidth: 0 }}>
+          <b>{demo ? "Modo demo" : "En vivo"}</b>
+          <span>
+            <i style={demo ? { background: "var(--warn)", boxShadow: "0 0 8px rgba(229,171,69,.6)" } : undefined} />
+            {demo ? "Datos sintéticos" : "Postgres · Producción"}
+          </span>
+        </div>
+      </div>
       <div className="nav-foot">
-        Los datos provienen de los reportes del agente de Telegram. Reflejan actividad y avance,
+        Los datos vienen de los reportes del agente de Telegram: reflejan actividad y avance,
         no horas ni cumplimiento de fechas.
       </div>
     </aside>
   );
 }
 
-export function Header({ demo }: { demo: boolean }) {
+export function Header({ demo, onLogout }: { demo: boolean; onLogout?: () => void }) {
   const section = useStore((s) => s.section);
   const t = SECTION_TITLE[section];
   const now = new Date().toLocaleString("es-CL", { dateStyle: "medium", timeStyle: "short" });
   return (
     <header className="header">
-      <div className="title">
-        <h1>{t.h1}</h1>
-        <div className="sub">{t.sub}</div>
+      <div className="header-topline">
+        <div className="breadcrumb">
+          <span><Icon name="panel" size={16} /></span>
+          <b>Panel de gestión</b>
+          <i>/</i>
+          <span className="crumb-now">{t.crumb}</span>
+        </div>
+        <div className="header-actions">
+          <span className="updated">Actualizado {now}</span>
+          {onLogout && (
+            <button className="icon-button" title="Salir" aria-label="Salir" onClick={onLogout}>
+              <Icon name="logout" />
+            </button>
+          )}
+        </div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span className="sub" style={{ fontSize: 12, color: "var(--text-3)" }}>
-          Actualizado: {now}
-        </span>
+      <div className="header-title-row">
+        <div className="title">
+          <h1>{t.h1}</h1>
+          <div className="sub">{t.sub}</div>
+        </div>
         {demo && <span className="demo-pill">Modo demo · datos sintéticos</span>}
       </div>
     </header>
@@ -108,21 +150,30 @@ export function FilterBar() {
 
   return (
     <div className="filterbar">
-      <div className="fx">
-        <label>Desde</label>
-        <input type="date" value={filters.desde} onChange={(e) => setFilter("desde", e.target.value)} />
+      <div className="filterbar-heading">
+        <span className="filter-icon"><Icon name="filter" size={16} /></span>
+        <div>
+          <b>Filtros</b>
+          <small>Afectan todo el panel</small>
+        </div>
       </div>
-      <div className="fx">
-        <label>Hasta</label>
-        <input type="date" value={filters.hasta} onChange={(e) => setFilter("hasta", e.target.value)} />
+      <div className="filter-fields">
+        <div className="fx">
+          <label>Desde</label>
+          <input type="date" value={filters.desde} onChange={(e) => setFilter("desde", e.target.value)} />
+        </div>
+        <div className="fx">
+          <label>Hasta</label>
+          <input type="date" value={filters.hasta} onChange={(e) => setFilter("hasta", e.target.value)} />
+        </div>
+        <Sel k="persona" label="Persona" items={opt?.personas} />
+        <Sel k="area" label="Área" items={opt?.areas} />
+        <Sel k="cliente" label="Cliente" items={opt?.clientes} />
+        <Sel k="proyecto" label="Proyecto" items={opt?.proyectos} />
+        <Sel k="estado" label="Estado" items={opt?.estados} />
       </div>
-      <Sel k="persona" label="Persona" items={opt?.personas} />
-      <Sel k="area" label="Área" items={opt?.areas} />
-      <Sel k="cliente" label="Cliente" items={opt?.clientes} />
-      <Sel k="proyecto" label="Proyecto" items={opt?.proyectos} />
-      <Sel k="estado" label="Estado" items={opt?.estados} />
       <button className="clear" onClick={clearFilters} disabled={!count}>
-        Limpiar filtros{count ? ` (${count})` : ""}
+        Limpiar{count ? ` (${count})` : ""}
       </button>
     </div>
   );
@@ -155,9 +206,7 @@ export function TaskDrawer() {
       <div className="drawer-scrim" onClick={closeDrawer} />
       <div className="drawer">
         <div className="d-head">
-          <button className="close" onClick={closeDrawer}>
-            ×
-          </button>
+          <button className="close" onClick={closeDrawer} aria-label="Cerrar">×</button>
           <div className="card-sub" style={{ marginBottom: 4 }}>Historial de la tarea</div>
           <h3 style={{ fontSize: 15, paddingRight: 24 }}>{drawerTitle}</h3>
         </div>
@@ -175,9 +224,7 @@ export function TaskDrawer() {
                     <b>{estadoLabel(m.estado)}</b>{" "}
                     {m.entregado_a && <span className="muted">→ {m.entregado_a}</span>}
                   </div>
-                  <div className="tmeta">
-                    {m.momento} · {m.persona_nombre}
-                  </div>
+                  <div className="tmeta">{m.momento} · {m.persona_nombre}</div>
                   {m.nota && <div className="tmeta">Nota: {m.nota}</div>}
                   {m.mensaje_original && <div className="torig">“{m.mensaje_original}”</div>}
                 </li>

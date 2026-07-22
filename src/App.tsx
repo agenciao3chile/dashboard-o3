@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useStore } from "./store";
 import { useApi } from "./lib";
 import { login } from "./api";
@@ -16,21 +16,30 @@ export function App() {
 
   if (auth?.required && !authed) return <Login onOk={() => setAuthed(true)} />;
 
+  const logout = auth?.required
+    ? () => {
+        localStorage.removeItem("o3_dashboard_key");
+        location.reload();
+      }
+    : undefined;
+
   return (
-    <div className="app">
-      <Sidebar />
-      <div className="main">
-        <Header demo={!!auth?.demo} />
-        <div className="content">
-          <FilterBar />
-          {section === "resumen" && <Resumen />}
-          {section === "operacion" && <Operacion />}
-          {section === "equipo" && <Equipo />}
-          {section === "clientes" && <Clientes />}
-          {section === "calidad" && <Calidad />}
+    <div className="app-frame">
+      <div className="app">
+        <Sidebar demo={!!auth?.demo} />
+        <div className="main">
+          <Header demo={!!auth?.demo} onLogout={logout} />
+          <div className="content">
+            <FilterBar />
+            {section === "resumen" && <Resumen />}
+            {section === "operacion" && <Operacion />}
+            {section === "equipo" && <Equipo />}
+            {section === "clientes" && <Clientes />}
+            {section === "calidad" && <Calidad />}
+          </div>
         </div>
+        <TaskDrawer />
       </div>
-      <TaskDrawer />
     </div>
   );
 }
@@ -45,7 +54,7 @@ function Login({ onOk }: { onOk: () => void }) {
   return (
     <div className="login">
       <div className="box">
-        <O3Logo className="logo" />
+        <span className="login-mark"><O3Logo /></span>
         <div style={{ fontWeight: 700, fontSize: 16 }}>Panel de Gestión O3</div>
         <div className="card-sub">Acceso de dirección</div>
         <input
