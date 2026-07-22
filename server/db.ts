@@ -36,11 +36,10 @@ function readSql(rel: string): string {
 async function makePgBackend(connectionString?: string): Promise<Backend> {
   // Con connectionString usa la URL; sin ella, node-postgres lee las variables
   // sueltas PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE (evita URL-encoding).
-  const pool = new pg.Pool(connectionString ? { connectionString, max: 6 } : { max: 6 });
-  // Fija la zona horaria de cada conexión nueva.
-  pool.on("connect", (client) => {
-    client.query(`SET TIME ZONE '${TZ}'`).catch(() => {});
-  });
+  // La zona horaria se fija al iniciar la conexión vía `options` (sin un query
+  // extra que compita con el primer query del pool).
+  const base = { max: 6, options: `-c timezone=${TZ}` };
+  const pool = new pg.Pool(connectionString ? { connectionString, ...base } : base);
   return {
     query: (sql, params) => pool.query(sql, params),
     exec: async (sql) => {
