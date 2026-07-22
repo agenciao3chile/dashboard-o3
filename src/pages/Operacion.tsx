@@ -33,7 +33,7 @@ export function Operacion() {
               </div>
             ))}
             <div style={{ marginLeft: "auto", textAlign: "center", minWidth: 96, padding: "10px 12px", borderRadius: 10,
-              background: "#fff5f5", border: "1px solid #fecaca" }}>
+              background: "rgba(240,82,82,0.10)", border: "1px solid rgba(240,82,82,0.30)" }}>
               <div style={{ fontSize: 22, fontWeight: 680, color: "var(--st-bloqueado)" }}>{funnel.bloqueado}</div>
               <div style={{ fontSize: 11, color: "var(--text-2)" }}>⛔ Bloqueadas</div>
             </div>

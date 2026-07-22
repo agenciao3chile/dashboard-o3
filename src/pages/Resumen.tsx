@@ -14,6 +14,13 @@ interface Summary {
 interface Alert { key: string; label: string; value: number | string; severity: string; filter: Record<string, string>; }
 interface Insight { texto: string; tono: "alerta" | "info" | "positivo"; accion: string; }
 
+// Tooltip oscuro para Recharts (por defecto viene blanco).
+const TT = {
+  contentStyle: { background: "var(--surface-2)", border: "1px solid var(--border-strong)", borderRadius: 8, fontSize: 12 },
+  labelStyle: { color: "var(--text-2)" },
+  itemStyle: { color: "var(--text)" },
+} as const;
+
 export function Resumen() {
   const { filters, setFilter, setSection, toggleFilter } = useStore();
   const { data: sum, loading } = useApi<Summary>("/api/summary", filters);
@@ -61,7 +68,7 @@ export function Resumen() {
                 <CartesianGrid horizontal={false} stroke="var(--border)" />
                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: "var(--text-3)" }} />
                 <YAxis type="category" dataKey="label" width={92} tick={{ fontSize: 12, fill: "var(--text-2)" }} />
-                <Tooltip cursor={{ fill: "var(--surface-2)" }} />
+                <Tooltip cursor={{ fill: "rgba(255,255,255,0.04)" }} {...TT} />
                 <Bar dataKey="cantidad" radius={[0, 4, 4, 0]} label={{ position: "right", fontSize: 12, fill: "var(--text-2)" }}
                   onClick={(d: any) => toggleFilter("estado", d.estado)} cursor="pointer">
                   {distData.map((d) => (
@@ -85,7 +92,7 @@ export function Resumen() {
                 <XAxis dataKey="semana" tick={{ fontSize: 10, fill: "var(--text-3)" }}
                   tickFormatter={(s) => s.slice(5)} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "var(--text-3)" }} />
-                <Tooltip />
+                <Tooltip {...TT} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="nuevas" name="Nuevas" fill="var(--st-pendiente)" radius={[3, 3, 0, 0]} barSize={9} />
                 <Bar dataKey="terminadas" name="Terminadas" fill="var(--st-entregado)" radius={[3, 3, 0, 0]} barSize={9} />

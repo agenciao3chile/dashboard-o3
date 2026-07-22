@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "./store";
 import { useApi } from "./lib";
 import { login } from "./api";
-import { Sidebar, Header, FilterBar, TaskDrawer } from "./components/shell";
+import { Sidebar, Header, FilterBar, TaskDrawer, O3Logo } from "./components/shell";
 import { Resumen } from "./pages/Resumen";
 import { Operacion } from "./pages/Operacion";
 import { Equipo } from "./pages/Equipo";
@@ -45,6 +45,7 @@ function Login({ onOk }: { onOk: () => void }) {
   return (
     <div className="login">
       <div className="box">
+        <O3Logo className="logo" />
         <div style={{ fontWeight: 700, fontSize: 16 }}>Panel de Gestión O3</div>
         <div className="card-sub">Acceso de dirección</div>
         <input
