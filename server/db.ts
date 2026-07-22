@@ -33,8 +33,10 @@ function readSql(rel: string): string {
   return readFileSync(join(__dirname, "..", rel), "utf8");
 }
 
-async function makePgBackend(connectionString: string): Promise<Backend> {
-  const pool = new pg.Pool({ connectionString, max: 6 });
+async function makePgBackend(connectionString?: string): Promise<Backend> {
+  // Con connectionString usa la URL; sin ella, node-postgres lee las variables
+  // sueltas PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE (evita URL-encoding).
+  const pool = new pg.Pool(connectionString ? { connectionString, max: 6 } : { max: 6 });
   // Fija la zona horaria de cada conexión nueva.
   pool.on("connect", (client) => {
     client.query(`SET TIME ZONE '${TZ}'`).catch(() => {});
@@ -61,8 +63,12 @@ async function makePgliteBackend(): Promise<Backend> {
 /** Inicializa el backend según el entorno y aplica las vistas analíticas. */
 export async function initDb(): Promise<void> {
   const url = (process.env.DATABASE_URL || "").trim();
-  if (url) {
-    backend = await makePgBackend(url);
+  // También se acepta configuración por variables sueltas (PGHOST/PGDATABASE…),
+  // que node-postgres lee automáticamente. Útil para copiar las credenciales del
+  // agente sin armar la URL ni encodear caracteres especiales de la clave.
+  const hasPgVars = !!(process.env.PGHOST || process.env.PGDATABASE);
+  if (url || hasPgVars) {
+    backend = await makePgBackend(url || undefined);
     DEMO_MODE = false;
     // En prod las tablas/vistas base ya existen (las crea el agente); solo
     // agregamos las vistas analíticas (idempotente). Si el usuario es read-only
