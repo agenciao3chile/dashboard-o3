@@ -203,10 +203,10 @@ table.data tr.clickable { cursor:pointer; }
 .timeline .tmeta { color:#6c6c75; font-size:10.5px; margin-top:2px; }
 .timeline .torig { color:#8a8a93; font-size:11px; font-style:italic; margin-top:4px; }
 
-.login { min-height:100vh; display:grid; place-items:center; background:radial-gradient(circle at 50% 15%,#24252c,#151517 42%,#101012); }
-.login .box { width:360px; max-width:calc(100vw - 32px); padding:30px; border:1px solid #303036; border-radius:20px; background:linear-gradient(180deg,#1a1a1d,#151517); box-shadow:0 35px 90px rgba(0,0,0,.55); }
-.login-mark { width:50px; height:50px; display:grid; place-items:center; margin-bottom:18px; border:1px solid #323239; border-radius:13px; background:#202023; color:#f3f3f4; }
-.login-mark svg { height:24px; width:auto; }
+.login { min-height:100vh; display:grid; place-items:center; background:var(--bg); }
+.login .box { width:360px; max-width:calc(100vw - 32px); padding:32px; border:1px solid var(--border); border-radius:20px; background:var(--surface); }
+.login-mark { display:block; margin-bottom:22px; color:#f2f2f4; }
+.login-mark svg { height:42px; width:auto; display:block; }
 .login input { width:100%; height:43px; margin:17px 0 10px; padding:0 12px; border:1px solid #34343a; border-radius:10px; background:#1e1e21; color:#fff; outline:none; }
 .login input:focus { border-color:#5369bf; box-shadow:0 0 0 3px rgba(111,140,255,.09); }
 .login button { width:100%; height:43px; border:1px solid #7189df; border-radius:10px; background:linear-gradient(180deg,#778fe7,#6279ce); color:white; font-weight:650; }
