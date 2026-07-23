@@ -38,7 +38,7 @@ async function makePgBackend(connectionString?: string): Promise<Backend> {
   // sueltas PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE (evita URL-encoding).
   // La zona horaria se fija al iniciar la conexión vía `options` (sin un query
   // extra que compita con el primer query del pool).
-  const base = { max: 6, options: `-c timezone=${TZ}` };
+  const base = { max: 10, options: `-c timezone=${TZ}` };
   const pool = new pg.Pool(connectionString ? { connectionString, ...base } : base);
   return {
     query: (sql, params) => pool.query(sql, params),
