@@ -65,7 +65,7 @@ export default async function teamRoutes(app: FastifyInstance) {
     );
     const tareas = await rows(
       `SELECT tipo,
-              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')) AS abiertas,
+              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')) AS abiertas,
               COUNT(*) FILTER (WHERE estado = 'bloqueado')                   AS bloqueadas
        FROM o3_estado_ext GROUP BY tipo`
     );
@@ -114,10 +114,10 @@ export default async function teamRoutes(app: FastifyInstance) {
   app.get("/api/team/by-area", async () => {
     return rows(
       `SELECT coalesce(area,'(sin área)') AS area,
-              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')) AS abiertas,
+              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')) AS abiertas,
               COUNT(*) FILTER (WHERE estado = 'en_revision')                 AS en_revision,
               COUNT(*) FILTER (WHERE estado = 'bloqueado')                   AS bloqueadas,
-              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')
+              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')
                                AND ultimo_movimiento < now() - interval '3 days') AS sin_movimiento
        FROM estado_actual_tareas
        GROUP BY area

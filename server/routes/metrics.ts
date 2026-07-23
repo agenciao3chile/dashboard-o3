@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { rows } from "../db.ts";
 import { parseFilters, buildWhere, CLIENTE_EXPR, clienteExprFor } from "../filters.ts";
 
-const ESTADOS = ["pendiente", "en_progreso", "en_revision", "aprobado", "entregado", "bloqueado"];
+const ESTADOS = ["pendiente", "en_progreso", "en_revision", "aprobado", "entregado", "publicado", "bloqueado"];
 const SNAP = { persona: "ultimo_reporto", area: "area", cliente: CLIENTE_EXPR, proyecto: "proyecto", tipo: "tipo" };
 const num = (v: any): number | null => (v == null ? null : Number(v));
 
@@ -31,10 +31,10 @@ export default async function metricsRoutes(app: FastifyInstance) {
 
     const [kpi] = await rows(
       `SELECT
-         COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado'))                 AS abiertas,
+         COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado'))                 AS abiertas,
          COUNT(*) FILTER (WHERE estado = 'en_revision')                                 AS en_revision,
          COUNT(*) FILTER (WHERE estado = 'bloqueado')                                   AS bloqueadas,
-         COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')
+         COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')
                           AND ultimo_movimiento < now() - interval '3 days')            AS sin_movimiento
        FROM o3_estado_ext ${snap.where}`,
       snap.params
@@ -107,7 +107,7 @@ export default async function metricsRoutes(app: FastifyInstance) {
     );
     const m = new Map(d.map((r) => [r.estado, Number(r.n)]));
     return {
-      flujo: ["pendiente", "en_progreso", "en_revision", "aprobado", "entregado"].map((e) => ({
+      flujo: ["pendiente", "en_progreso", "en_revision", "aprobado", "entregado", "publicado"].map((e) => ({
         estado: e,
         n: m.get(e) ?? 0,
       })),

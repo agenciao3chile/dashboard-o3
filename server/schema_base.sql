@@ -51,7 +51,7 @@ FROM reportes
 ORDER BY tarea_key(cliente, proyecto, tarea), creado DESC, id DESC;
 
 CREATE OR REPLACE VIEW tareas_pendientes AS
-SELECT * FROM estado_actual_tareas WHERE estado NOT IN ('aprobado', 'entregado');
+SELECT * FROM estado_actual_tareas WHERE estado NOT IN ('aprobado', 'entregado', 'publicado');
 
 CREATE OR REPLACE VIEW pendientes_aprobacion AS
 SELECT * FROM estado_actual_tareas WHERE estado = 'en_revision';
@@ -78,6 +78,6 @@ CREATE OR REPLACE VIEW entregas_semana AS
 SELECT persona_nombre AS persona, area, cliente, proyecto, tarea,
        estado, entregado_a, fecha, creado
 FROM reportes
-WHERE estado IN ('aprobado', 'entregado')
+WHERE estado IN ('aprobado', 'entregado', 'publicado')
   AND date_trunc('week', creado) = date_trunc('week', now())
 ORDER BY creado DESC;

@@ -47,7 +47,7 @@ SELECT clave,
        MIN(creado) AS terminado_en,
        MIN(fecha)  AS terminado_fecha
 FROM o3_task_events
-WHERE estado IN ('aprobado', 'entregado')
+WHERE estado IN ('aprobado', 'entregado', 'publicado')
 GROUP BY clave;
 
 -- ─── Tiempo de ciclo por tarea (primer reporte → primer terminal) ─────────
@@ -80,7 +80,7 @@ SELECT clave, cliente, proyecto, tarea, area, persona_nombre, creado,
        estado_prev, estado
 FROM o3_task_events
 WHERE (estado_prev = 'en_revision' AND estado = 'en_progreso')
-   OR (estado_prev IN ('aprobado', 'entregado')
+   OR (estado_prev IN ('aprobado', 'entregado', 'publicado')
        AND estado IN ('pendiente', 'en_progreso', 'en_revision', 'bloqueado'));
 
 -- ─── Estado actual enriquecido con el tipo del responsable ────────────────
@@ -99,7 +99,7 @@ SELECT clave, cliente, proyecto, tarea, estado, entregado_a,
        ultimo_reporto, area, ultima_fecha, ultimo_movimiento, tipo,
        EXTRACT(EPOCH FROM (now() - ultimo_movimiento)) / 86400.0 AS dias_sin_mov
 FROM o3_estado_ext
-WHERE estado NOT IN ('aprobado', 'entregado');
+WHERE estado NOT IN ('aprobado', 'entregado', 'publicado');
 
 -- ─── Flujo semanal (entradas y cierres por semana ISO) ────────────────────
 CREATE OR REPLACE VIEW o3_weekly_flow AS

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Filters } from "./store";
 
-export const ESTADOS = ["pendiente", "en_progreso", "en_revision", "aprobado", "entregado", "bloqueado"] as const;
+export const ESTADOS = ["pendiente", "en_progreso", "en_revision", "aprobado", "entregado", "publicado", "bloqueado"] as const;
 export type Estado = (typeof ESTADOS)[number];
 
 export const ESTADO_META: Record<string, { label: string; color: string; emoji: string }> = {
@@ -11,6 +11,7 @@ export const ESTADO_META: Record<string, { label: string; color: string; emoji: 
   en_revision: { label: "En revisión", color: "var(--st-en_revision)", emoji: "◕" },
   aprobado: { label: "Aprobado", color: "var(--st-aprobado)", emoji: "✓" },
   entregado: { label: "Entregado", color: "var(--st-entregado)", emoji: "✔" },
+  publicado: { label: "Publicado", color: "var(--st-publicado)", emoji: "🚀" },
   bloqueado: { label: "Bloqueado", color: "var(--st-bloqueado)", emoji: "⛔" },
 };
 export const estadoColor = (e: string) => ESTADO_META[e]?.color ?? "var(--text-3)";

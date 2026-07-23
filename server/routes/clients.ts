@@ -7,11 +7,11 @@ export default async function clientsRoutes(app: FastifyInstance) {
   app.get("/api/clients", async () => {
     const open = await rows(
       `SELECT ${CLIENTE_EXPR} AS cliente,
-              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')) AS abiertas,
+              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')) AS abiertas,
               COUNT(*) FILTER (WHERE estado = 'en_progreso')                 AS en_progreso,
               COUNT(*) FILTER (WHERE estado = 'en_revision')                 AS en_revision,
               COUNT(*) FILTER (WHERE estado = 'bloqueado')                   AS bloqueadas,
-              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')
+              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')
                                AND ultimo_movimiento < now() - interval '3 days') AS sin_movimiento
        FROM estado_actual_tareas
        GROUP BY 1
@@ -51,8 +51,8 @@ export default async function clientsRoutes(app: FastifyInstance) {
     const [counts] = await rows(
       `SELECT
          COUNT(DISTINCT proyecto) FILTER (WHERE proyecto IS NOT NULL)   AS proyectos,
-         COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')) AS abiertas,
-         COUNT(*) FILTER (WHERE estado IN ('aprobado','entregado'))     AS terminadas,
+         COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')) AS abiertas,
+         COUNT(*) FILTER (WHERE estado IN ('aprobado','entregado','publicado'))     AS terminadas,
          COUNT(*) FILTER (WHERE estado = 'en_revision')                 AS en_revision,
          COUNT(*) FILTER (WHERE estado = 'bloqueado')                   AS bloqueadas
        FROM estado_actual_tareas WHERE ${match}`,
@@ -94,8 +94,8 @@ export default async function clientsRoutes(app: FastifyInstance) {
       `SELECT ${CLIENTE_EXPR} AS cliente,
               coalesce(nullif(btrim(proyecto),''),'(sin proyecto)') AS proyecto,
               COUNT(*)                                              AS total,
-              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')) AS abiertas,
-              COUNT(*) FILTER (WHERE estado IN ('aprobado','entregado'))     AS terminadas,
+              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado','publicado')) AS abiertas,
+              COUNT(*) FILTER (WHERE estado IN ('aprobado','entregado','publicado'))     AS terminadas,
               COUNT(*) FILTER (WHERE estado = 'bloqueado')                   AS bloqueadas,
               to_char(MAX(ultimo_movimiento),'YYYY-MM-DD')                   AS ultimo_movimiento
        FROM estado_actual_tareas

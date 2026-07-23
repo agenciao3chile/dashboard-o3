@@ -107,9 +107,10 @@ function timeline(startMs: number): Mov[] {
 
   if (!push("aprobado", int(1, 3))) return movs;
 
-  // la mayoría termina entregada
+  // la mayoría termina entregada; parte del contenido además se publica
   if (chance(0.75)) {
     push("entregado", int(0, 2), { entregado_a: pick(["Cliente", "María José", "Dante", "Francisca"]) });
+    if (chance(0.45)) push("publicado", int(0, 2));
   }
 
   // reapertura ocasional (señal de retrabajo post-aprobación)

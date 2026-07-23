@@ -21,7 +21,7 @@ export default async function tasksRoutes(app: FastifyInstance) {
               r.nota,
               CASE
                 WHEN e.estado = 'bloqueado' THEN 'bloqueada'
-                WHEN e.estado NOT IN ('aprobado','entregado')
+                WHEN e.estado NOT IN ('aprobado','entregado','publicado')
                      AND e.ultimo_movimiento < now() - interval '3 days' THEN 'sin_movimiento'
                 WHEN e.estado = 'en_revision' THEN 'revision'
                 ELSE ''
