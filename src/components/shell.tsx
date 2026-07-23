@@ -55,7 +55,7 @@ export function Sidebar() {
                 onClick={() => setSection(n.key)}
               >
                 <span className="ico"><Icon name={n.icon} /></span>
-                {n.label}
+                <span className="nav-text">{n.label}</span>
                 {section === n.key && <span className="nav-active-dot" />}
               </button>
             ))}
