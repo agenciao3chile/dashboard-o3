@@ -12,6 +12,7 @@ export default async function tasksRoutes(app: FastifyInstance) {
       cliente: clienteExprFor("e"),
       proyecto: "e.proyecto",
       estado: "e.estado",
+      tipo: "e.tipo",
     });
     const data = await rows(
       `SELECT e.clave, e.cliente, e.proyecto, e.tarea, e.estado, e.entregado_a,
@@ -25,7 +26,7 @@ export default async function tasksRoutes(app: FastifyInstance) {
                 WHEN e.estado = 'en_revision' THEN 'revision'
                 ELSE ''
               END AS alerta
-       FROM estado_actual_tareas e
+       FROM o3_estado_ext e
        LEFT JOIN reportes r ON r.id = e.ultimo_reporte_id
        ${w.where}
        ORDER BY (e.estado = 'bloqueado') DESC, dias_sin_mov DESC`,

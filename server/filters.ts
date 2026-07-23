@@ -8,6 +8,7 @@ export interface Filters {
   cliente?: string;
   proyecto?: string;
   estado?: string;
+  tipo?: string;
 }
 
 /** Expresión canónica de cliente (agrupa vacíos como "(sin cliente)"). */
@@ -25,10 +26,11 @@ export function parseFilters(q: Record<string, any>): Filters {
     cliente: s(q.cliente),
     proyecto: s(q.proyecto),
     estado: s(q.estado),
+    tipo: s(q.tipo),
   };
 }
 
-type Key = "persona" | "area" | "cliente" | "proyecto" | "estado" | "fecha";
+type Key = "persona" | "area" | "cliente" | "proyecto" | "estado" | "tipo" | "fecha";
 
 /**
  * Construye el WHERE a partir de los filtros. `map` indica qué expresión SQL
@@ -51,6 +53,7 @@ export function buildWhere(
   if (map.cliente && f.cliente) eq(map.cliente, f.cliente);
   if (map.proyecto && f.proyecto) eq(map.proyecto, f.proyecto);
   if (map.estado && f.estado) eq(map.estado, f.estado);
+  if (map.tipo && f.tipo) eq(map.tipo, f.tipo);
   if (map.fecha && f.desde) {
     cond.push(`${map.fecha} >= $${i++}::date`);
     params.push(f.desde);

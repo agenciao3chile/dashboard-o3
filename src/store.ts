@@ -10,9 +10,10 @@ export interface Filters {
   cliente: string;
   proyecto: string;
   estado: string;
+  tipo: string;
 }
 
-const EMPTY: Filters = { desde: "", hasta: "", persona: "", area: "", cliente: "", proyecto: "", estado: "" };
+const EMPTY: Filters = { desde: "", hasta: "", persona: "", area: "", cliente: "", proyecto: "", estado: "", tipo: "" };
 
 interface Store {
   section: Section;

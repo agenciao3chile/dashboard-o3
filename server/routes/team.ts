@@ -1,9 +1,18 @@
 import type { FastifyInstance } from "fastify";
 import { rows } from "../db.ts";
+import { parseFilters, buildWhere, clienteExprFor } from "../filters.ts";
 
 export default async function teamRoutes(app: FastifyInstance) {
   // Carga actual por persona (barras apiladas por estado abierto).
-  app.get("/api/team/load", async () => {
+  app.get("/api/team/load", async (req) => {
+    const f = parseFilters(req.query as any);
+    const w = buildWhere(f, {
+      persona: "tp.ultimo_reporto",
+      area: "tp.area",
+      cliente: clienteExprFor("tp"),
+      proyecto: "tp.proyecto",
+      tipo: "COALESCE(p.tipo, 'fijo')",
+    });
     const data = await rows(
       `SELECT tp.ultimo_reporto AS persona, tp.area,
               COALESCE(max(p.tipo), 'fijo')                        AS tipo,
@@ -17,8 +26,10 @@ export default async function teamRoutes(app: FastifyInstance) {
                 ORDER BY EXTRACT(EPOCH FROM (now() - tp.ultimo_movimiento)) / 86400.0)::numeric, 1) AS mediana_dias
        FROM tareas_pendientes tp
        LEFT JOIN personas p ON lower(p.nombre) = lower(tp.ultimo_reporto)
+       ${w.where}
        GROUP BY tp.ultimo_reporto, tp.area
-       ORDER BY abiertas DESC`
+       ORDER BY abiertas DESC`,
+      w.params
     );
     const nums = data.map((r) => Number(r.abiertas));
     const avg = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
@@ -44,6 +55,28 @@ export default async function teamRoutes(app: FastifyInstance) {
         señales,
       };
     });
+  });
+
+  // Desglose fijos vs freelance: personas activas y tareas abiertas por tipo.
+  app.get("/api/team/by-tipo", async () => {
+    const personas = await rows(
+      `SELECT COALESCE(tipo,'fijo') AS tipo, COUNT(*) AS personas
+       FROM personas WHERE activo GROUP BY 1`
+    );
+    const tareas = await rows(
+      `SELECT tipo,
+              COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')) AS abiertas,
+              COUNT(*) FILTER (WHERE estado = 'bloqueado')                   AS bloqueadas
+       FROM o3_estado_ext GROUP BY tipo`
+    );
+    const pmap = new Map(personas.map((r) => [r.tipo, Number(r.personas)]));
+    const tmap = new Map(tareas.map((r) => [r.tipo, r]));
+    return ["fijo", "freelance"].map((tipo) => ({
+      tipo,
+      personas: pmap.get(tipo) ?? 0,
+      abiertas: Number(tmap.get(tipo)?.abiertas ?? 0),
+      bloqueadas: Number(tmap.get(tipo)?.bloqueadas ?? 0),
+    }));
   });
 
   // Consistencia de reporte (últimos 28 días hábiles). Excluye reporta=false.

@@ -83,12 +83,22 @@ WHERE (estado_prev = 'en_revision' AND estado = 'en_progreso')
    OR (estado_prev IN ('aprobado', 'entregado')
        AND estado IN ('pendiente', 'en_progreso', 'en_revision', 'bloqueado'));
 
+-- ─── Estado actual enriquecido con el tipo del responsable ────────────────
+-- Suma el tipo (fijo/freelance) de la persona que reportó al último, para poder
+-- filtrar el panel por tipo. Join por nombre (mismo roster).
+CREATE OR REPLACE VIEW o3_estado_ext AS
+SELECT e.clave, e.cliente, e.proyecto, e.tarea, e.estado, e.entregado_a,
+       e.ultimo_reporto, e.area, e.ultima_fecha, e.ultimo_movimiento, e.ultimo_reporte_id,
+       COALESCE(p.tipo, 'fijo') AS tipo
+FROM estado_actual_tareas e
+LEFT JOIN personas p ON lower(p.nombre) = lower(e.ultimo_reporto);
+
 -- ─── Antigüedad de tareas abiertas (días corridos sin movimiento) ─────────
 CREATE OR REPLACE VIEW o3_task_aging AS
 SELECT clave, cliente, proyecto, tarea, estado, entregado_a,
-       ultimo_reporto, area, ultima_fecha, ultimo_movimiento,
+       ultimo_reporto, area, ultima_fecha, ultimo_movimiento, tipo,
        EXTRACT(EPOCH FROM (now() - ultimo_movimiento)) / 86400.0 AS dias_sin_mov
-FROM estado_actual_tareas
+FROM o3_estado_ext
 WHERE estado NOT IN ('aprobado', 'entregado');
 
 -- ─── Flujo semanal (entradas y cierres por semana ISO) ────────────────────

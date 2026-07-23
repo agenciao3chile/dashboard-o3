@@ -154,6 +154,14 @@ export function FilterBar() {
         <Sel k="cliente" label="Cliente" items={opt?.clientes} />
         <Sel k="proyecto" label="Proyecto" items={opt?.proyectos} />
         <Sel k="estado" label="Estado" items={opt?.estados} />
+        <div className="fx">
+          <label>Tipo</label>
+          <select value={filters.tipo} onChange={(e) => setFilter("tipo", e.target.value)}>
+            <option value="">Todos</option>
+            <option value="fijo">Fijo</option>
+            <option value="freelance">Freelance</option>
+          </select>
+        </div>
       </div>
       <button className="clear" onClick={clearFilters} disabled={!count}>
         Limpiar{count ? ` (${count})` : ""}

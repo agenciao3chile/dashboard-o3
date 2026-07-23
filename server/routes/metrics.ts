@@ -3,7 +3,7 @@ import { rows } from "../db.ts";
 import { parseFilters, buildWhere, CLIENTE_EXPR, clienteExprFor } from "../filters.ts";
 
 const ESTADOS = ["pendiente", "en_progreso", "en_revision", "aprobado", "entregado", "bloqueado"];
-const SNAP = { persona: "ultimo_reporto", area: "area", cliente: CLIENTE_EXPR, proyecto: "proyecto" };
+const SNAP = { persona: "ultimo_reporto", area: "area", cliente: CLIENTE_EXPR, proyecto: "proyecto", tipo: "tipo" };
 const num = (v: any): number | null => (v == null ? null : Number(v));
 
 export default async function metricsRoutes(app: FastifyInstance) {
@@ -36,7 +36,7 @@ export default async function metricsRoutes(app: FastifyInstance) {
          COUNT(*) FILTER (WHERE estado = 'bloqueado')                                   AS bloqueadas,
          COUNT(*) FILTER (WHERE estado NOT IN ('aprobado','entregado')
                           AND ultimo_movimiento < now() - interval '3 days')            AS sin_movimiento
-       FROM estado_actual_tareas ${snap.where}`,
+       FROM o3_estado_ext ${snap.where}`,
       snap.params
     );
 
@@ -46,11 +46,12 @@ export default async function metricsRoutes(app: FastifyInstance) {
       area: "e.area",
       cliente: clienteExprFor("e"),
       proyecto: "e.proyecto",
+      tipo: "e.tipo",
       fecha: "t.terminado_en",
     });
     const [t] = await rows(
       `SELECT COUNT(*) AS terminadas
-       FROM o3_task_terminal t JOIN estado_actual_tareas e USING (clave) ${term.where}`,
+       FROM o3_task_terminal t JOIN o3_estado_ext e USING (clave) ${term.where}`,
       term.params
     );
 
@@ -77,7 +78,7 @@ export default async function metricsRoutes(app: FastifyInstance) {
     const f = parseFilters(req.query as any);
     const snap = buildWhere(f, SNAP);
     const data = await rows(
-      `SELECT estado, COUNT(*) AS cantidad FROM estado_actual_tareas ${snap.where} GROUP BY estado`,
+      `SELECT estado, COUNT(*) AS cantidad FROM o3_estado_ext ${snap.where} GROUP BY estado`,
       snap.params
     );
     const byEstado = new Map(data.map((r) => [r.estado, Number(r.cantidad)]));

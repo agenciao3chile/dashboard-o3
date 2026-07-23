@@ -1,5 +1,8 @@
 import { useApi, estadoColor, nfmt } from "../lib";
 import { Card, CardHead, StackBar, EmptyState, Loading } from "../components/ui";
+import { useStore } from "../store";
+
+interface Tipo { tipo: string; personas: number; abiertas: number; bloqueadas: number; }
 
 interface Load {
   persona: string; area: string | null; tipo: string; abiertas: number;
@@ -23,13 +26,33 @@ const SEG = [
 ];
 
 export function Equipo() {
-  const { data: load } = useApi<Load[]>("/api/team/load");
+  const filters = useStore((s) => s.filters);
+  const { data: load } = useApi<Load[]>("/api/team/load", filters);
   const { data: rep } = useApi<Rep[]>("/api/team/reporting");
   const { data: areas } = useApi<Area[]>("/api/team/by-area");
+  const { data: tipos } = useApi<Tipo[]>("/api/team/by-tipo");
   const max = Math.max(1, ...(load ?? []).map((l) => l.abiertas));
 
   return (
     <>
+      <Card style={{ marginBottom: 14 }}>
+        <CardHead title="Fijos vs freelance" sub="Personas activas y tareas abiertas por tipo de contratación" />
+        {!tipos ? <Loading h={70} /> : (
+          <div className="grid cols-2" style={{ gap: 12 }}>
+            {tipos.map((t) => (
+              <div key={t.tipo} style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 12, padding: "13px 15px" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, textTransform: "capitalize", color: t.tipo === "freelance" ? "var(--warn)" : "var(--text)" }}>{t.tipo}</div>
+                <div style={{ display: "flex", gap: 22, marginTop: 8 }}>
+                  <div><div style={{ fontSize: 22, fontWeight: 680 }}>{nfmt(t.personas)}</div><div className="muted" style={{ fontSize: 11 }}>personas</div></div>
+                  <div><div style={{ fontSize: 22, fontWeight: 680 }}>{nfmt(t.abiertas)}</div><div className="muted" style={{ fontSize: 11 }}>tareas abiertas</div></div>
+                  <div><div style={{ fontSize: 22, fontWeight: 680, color: t.bloqueadas ? "var(--danger)" : undefined }}>{nfmt(t.bloqueadas)}</div><div className="muted" style={{ fontSize: 11 }}>bloqueadas</div></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
       <Card>
         <CardHead title="Carga actual por persona" sub="Solo tareas abiertas · el objetivo es administrar capacidad, no rankear personas" />
         {!load ? <Loading h={220} /> : load.length === 0 ? (
