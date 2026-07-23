@@ -5,17 +5,19 @@ export default async function teamRoutes(app: FastifyInstance) {
   // Carga actual por persona (barras apiladas por estado abierto).
   app.get("/api/team/load", async () => {
     const data = await rows(
-      `SELECT ultimo_reporto AS persona, area,
-              COUNT(*)                                          AS abiertas,
-              COUNT(*) FILTER (WHERE estado = 'pendiente')      AS pendiente,
-              COUNT(*) FILTER (WHERE estado = 'en_progreso')    AS en_progreso,
-              COUNT(*) FILTER (WHERE estado = 'en_revision')    AS en_revision,
-              COUNT(*) FILTER (WHERE estado = 'bloqueado')      AS bloqueado,
-              COUNT(*) FILTER (WHERE ultimo_movimiento < now() - interval '3 days') AS sin_movimiento,
+      `SELECT tp.ultimo_reporto AS persona, tp.area,
+              COALESCE(max(p.tipo), 'fijo')                        AS tipo,
+              COUNT(*)                                             AS abiertas,
+              COUNT(*) FILTER (WHERE tp.estado = 'pendiente')      AS pendiente,
+              COUNT(*) FILTER (WHERE tp.estado = 'en_progreso')    AS en_progreso,
+              COUNT(*) FILTER (WHERE tp.estado = 'en_revision')    AS en_revision,
+              COUNT(*) FILTER (WHERE tp.estado = 'bloqueado')      AS bloqueado,
+              COUNT(*) FILTER (WHERE tp.ultimo_movimiento < now() - interval '3 days') AS sin_movimiento,
               round(percentile_cont(0.5) WITHIN GROUP (
-                ORDER BY EXTRACT(EPOCH FROM (now() - ultimo_movimiento)) / 86400.0)::numeric, 1) AS mediana_dias
-       FROM tareas_pendientes
-       GROUP BY ultimo_reporto, area
+                ORDER BY EXTRACT(EPOCH FROM (now() - tp.ultimo_movimiento)) / 86400.0)::numeric, 1) AS mediana_dias
+       FROM tareas_pendientes tp
+       LEFT JOIN personas p ON lower(p.nombre) = lower(tp.ultimo_reporto)
+       GROUP BY tp.ultimo_reporto, tp.area
        ORDER BY abiertas DESC`
     );
     const nums = data.map((r) => Number(r.abiertas));
@@ -31,6 +33,7 @@ export default async function teamRoutes(app: FastifyInstance) {
       return {
         persona: r.persona,
         area: r.area,
+        tipo: r.tipo as string,
         abiertas,
         pendiente: Number(r.pendiente),
         en_progreso: Number(r.en_progreso),

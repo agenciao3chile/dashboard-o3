@@ -2,10 +2,16 @@ import { useApi, estadoColor, nfmt } from "../lib";
 import { Card, CardHead, StackBar, EmptyState, Loading } from "../components/ui";
 
 interface Load {
-  persona: string; area: string | null; abiertas: number;
+  persona: string; area: string | null; tipo: string; abiertas: number;
   pendiente: number; en_progreso: number; en_revision: number; bloqueado: number;
   sin_movimiento: number; mediana_dias: number; señales: string[];
 }
+
+const FL_TAG: React.CSSProperties = {
+  flex: "0 0 auto", fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 999,
+  color: "var(--warn)", border: "1px solid rgba(229,171,69,.3)", background: "rgba(229,171,69,.08)",
+  textTransform: "uppercase", letterSpacing: ".04em",
+};
 interface Rep { persona: string; area: string | null; esperados: number; con_reporte: number; cumplimiento: number; }
 interface Area { area: string; abiertas: number; en_revision: number; bloqueadas: number; sin_movimiento: number; }
 
@@ -33,8 +39,12 @@ export function Equipo() {
             <div>
               {load.map((l) => (
                 <div key={l.persona} style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-                  <div className="hbar">
-                    <div className="name" title={`${l.persona} — ${l.area ?? ""}`}>{l.persona}</div>
+                  <div className="hbar" style={{ gridTemplateColumns: "172px 1fr 44px" }}>
+                    <div className="name" title={`${l.persona} — ${l.area ?? ""}`}
+                      style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.persona}</span>
+                      {l.tipo === "freelance" && <span style={FL_TAG}>freelance</span>}
+                    </div>
                     <StackBar total={l.abiertas} max={max}
                       segments={SEG.map((s) => ({ key: s.key, value: (l as any)[s.key], color: s.color }))} />
                     <div className="num">{l.abiertas}</div>

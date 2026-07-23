@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS personas (
     area        TEXT,
     activo      BOOLEAN     NOT NULL DEFAULT TRUE,
     reporta     BOOLEAN     NOT NULL DEFAULT TRUE,
+    asigna      BOOLEAN     NOT NULL DEFAULT FALSE,
+    tipo        TEXT        NOT NULL DEFAULT 'fijo',
     creado      TIMESTAMPTZ NOT NULL DEFAULT now(),
     actualizado TIMESTAMPTZ NOT NULL DEFAULT now()
 );

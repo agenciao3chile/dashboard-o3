@@ -37,15 +37,15 @@ function iso(ms: number): string {
 }
 
 const PERSONAS = [
-  { chat_id: "8920381767", nombre: "Dante Torres", area: "Dirección Creativa", reporta: false },
-  { chat_id: "8947760744", nombre: "Francisca Troncoso", area: "Administración", reporta: true },
-  { chat_id: "6231570634", nombre: "Gonzalo Poblete", area: "Audiovisual", reporta: true },
-  { chat_id: "8444580851", nombre: "Debonne Jiménez", area: "Audiovisual", reporta: true },
-  { chat_id: "5809796354", nombre: "Patricio González", area: "Diseño", reporta: true },
-  { chat_id: "6541091356", nombre: "María José Muñoz", area: "Meta Ads", reporta: true },
-  { chat_id: "7100000001", nombre: "Rodrigo Argote", area: "Dirección de Arte", reporta: true },
-  { chat_id: "7100000002", nombre: "Daniel Vega", area: "Audiovisual", reporta: true },
-  { chat_id: "7100000003", nombre: "Robinson Retamal", area: "Ventas", reporta: true },
+  { chat_id: "8920381767", nombre: "Dante Torres", area: "Dirección Creativa", reporta: false, tipo: "fijo" },
+  { chat_id: "8947760744", nombre: "Francisca Troncoso", area: "Administración", reporta: true, tipo: "fijo" },
+  { chat_id: "6231570634", nombre: "Gonzalo Poblete", area: "Audiovisual", reporta: true, tipo: "fijo" },
+  { chat_id: "8444580851", nombre: "Debonne Jiménez", area: "Audiovisual", reporta: true, tipo: "freelance" },
+  { chat_id: "5809796354", nombre: "Patricio González", area: "Diseño", reporta: true, tipo: "fijo" },
+  { chat_id: "6541091356", nombre: "María José Muñoz", area: "Meta Ads", reporta: true, tipo: "fijo" },
+  { chat_id: "7100000001", nombre: "Rodrigo Argote", area: "Dirección de Arte", reporta: true, tipo: "fijo" },
+  { chat_id: "7100000002", nombre: "Daniel Vega", area: "Audiovisual", reporta: true, tipo: "freelance" },
+  { chat_id: "7100000003", nombre: "Robinson Retamal", area: "Ventas", reporta: true, tipo: "fijo" },
 ];
 const REPORTAN = PERSONAS.filter((p) => p.reporta);
 
@@ -122,9 +122,9 @@ function timeline(startMs: number): Mov[] {
 export async function seedDemo(db: DemoDb): Promise<void> {
   for (const p of PERSONAS) {
     await db.query(
-      `INSERT INTO personas (chat_id, nombre, area, activo, reporta)
-       VALUES ($1,$2,$3,TRUE,$4) ON CONFLICT (chat_id) DO NOTHING`,
-      [p.chat_id, p.nombre, p.area, p.reporta]
+      `INSERT INTO personas (chat_id, nombre, area, activo, reporta, tipo)
+       VALUES ($1,$2,$3,TRUE,$4,$5) ON CONFLICT (chat_id) DO NOTHING`,
+      [p.chat_id, p.nombre, p.area, p.reporta, p.tipo]
     );
   }
 
